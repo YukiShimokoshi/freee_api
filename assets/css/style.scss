@@ -1,0 +1,552 @@
+// ========================================
+// freee API Sample Application Styles
+// ========================================
+
+@use "sass:color";
+
+// Variables
+$primary-color: #007bff;
+$primary-hover: #0056b3;
+$secondary-color: #6c757d;
+$secondary-hover: #545b62;
+$success-color: #28a745;
+$danger-color: #dc3545;
+$warning-color: #856404;
+$info-color: #17a2b8;
+$info-hover: #138496;
+$light-bg: #f8f9fa;
+$border-color: #dee2e6;
+$text-muted: #6c757d;
+$text-dark: #333;
+$text-medium: #555;
+$text-light: #666;
+$border-radius: 4px;
+$border-radius-lg: 8px;
+$transition: 0.15s ease-in-out;
+$box-shadow-focus: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+
+// Alert colors
+$alert-warning-color: #856404;
+$alert-warning-bg: #fff3cd;
+$alert-warning-border: #ffeaa7;
+$alert-danger-color: #721c24;
+$alert-danger-bg: #f8d7da;
+$alert-danger-border: #f5c6cb;
+$alert-success-color: #155724;
+$alert-success-bg: #d4edda;
+$alert-success-border: #c3e6cb;
+$alert-info-color: #0c5460;
+$alert-info-bg: #d1ecf1;
+$alert-info-border: #bee5eb;
+
+// Base Styles
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: $text-dark;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+// Container
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+
+  &.narrow {
+    max-width: 800px;
+  }
+
+  &.wide {
+    max-width: 1400px;
+  }
+}
+
+// Header Section
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+
+  h1 {
+    color: $text-dark;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+// Typography
+h1 {
+  color: $text-dark;
+  margin: 0;
+}
+
+h2 {
+  color: $text-medium;
+  margin-bottom: 20px;
+}
+
+h3 {
+  color: $text-medium;
+  margin-bottom: 15px;
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: background-color $transition;
+
+  &.btn-primary {
+    background-color: $primary-color;
+    color: white;
+
+    &:hover {
+      background-color: $primary-hover;
+    }
+  }
+
+  &.btn-secondary {
+    background-color: $secondary-color;
+    color: white;
+
+    &:hover {
+      background-color: $secondary-hover;
+    }
+  }
+
+  &.btn-info {
+    background-color: $info-color;
+    color: white;
+
+    &:hover {
+      background-color: $info-hover;
+    }
+  }
+  
+  &-info {
+    background-color: $info-color;
+    border-color: $info-color;
+    color: white;
+
+    &:hover {
+      background-color: $info-hover;
+      border-color: $info-hover;
+    }
+  }
+
+  &-success {
+    background-color: $success-color;
+    border-color: $success-color;
+    color: white;
+
+    &:hover {
+      background-color: color.adjust($success-color, $lightness: -10%);
+      border-color: color.adjust($success-color, $lightness: -10%);
+    }
+  }
+}
+
+// Forms
+.deal-form-container,
+.search-form-container {
+  background: $light-bg;
+  padding: 30px;
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-color;
+  margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.search-form-container {
+  padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  .search-form-container & {
+    margin-bottom: 15px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+
+  .form-group {
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+
+    .deals-page & {
+      gap: 0;
+    }
+  }
+}
+
+.form-input {
+  flex: 1;
+}
+
+.form-button {
+  flex-shrink: 0;
+}
+
+.col-md-6 {
+  flex: 1;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: $text-dark;
+
+  .required {
+    color: $danger-color;
+  }
+
+  .filter-section & {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: $border-radius;
+  font-size: 14px;
+  transition: border-color $transition, box-shadow $transition;
+
+  &:focus {
+    border-color: $primary-color;
+    outline: 0;
+    box-shadow: $box-shadow-focus;
+  }
+}
+
+.form-text {
+  margin-top: 5px;
+  font-size: 12px;
+
+  &.text-muted {
+    color: $text-muted;
+  }
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+  text-align: center;
+}
+
+// Tables
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+
+  th,
+  td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: $light-bg;
+    font-weight: bold;
+
+    .items-page & {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  &.table-striped tbody tr:nth-child(odd) {
+    background-color: $light-bg;
+  }
+}
+
+// Account Items Specific Styles
+.account-items-section {
+  margin-top: 30px;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #e9ecef;
+  border-radius: $border-radius;
+
+  input[type="checkbox"] {
+    margin-right: 8px;
+  }
+}
+
+.account-id {
+  font-weight: bold;
+  color: $primary-color;
+}
+
+.account-name {
+  font-weight: 500;
+}
+
+// Stats Section
+.stats-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid $border-color;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: $light-bg;
+  padding: 15px;
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-color;
+
+  h4 {
+    margin: 0 0 10px 0;
+    color: $text-dark;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: $text-light;
+  }
+}
+
+// Badges
+.badge {
+  padding: 4px 8px;
+  border-radius: $border-radius;
+  font-size: 0.875em;
+  font-weight: bold;
+
+  &.badge-primary {
+    background-color: $primary-color;
+    color: white;
+  }
+
+  &.badge-secondary {
+    background-color: $secondary-color;
+    color: white;
+  }
+
+  &.badge-success {
+    background-color: $success-color;
+    color: white;
+  }
+}
+
+// Alerts
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: $border-radius;
+
+  &.alert-warning {
+    color: $alert-warning-color;
+    background-color: $alert-warning-bg;
+    border-color: $alert-warning-border;
+  }
+
+  &.alert-danger {
+    color: $alert-danger-color;
+    background-color: $alert-danger-bg;
+    border-color: $alert-danger-border;
+  }
+
+  &.alert-success {
+    color: $alert-success-color;
+    background-color: $alert-success-bg;
+    border-color: $alert-success-border;
+  }
+
+  &.alert-info {
+    color: $alert-info-color;
+    background-color: $alert-info-bg;
+    border-color: $alert-info-border;
+  }
+}
+
+// ========================================
+// Template Section Styles
+// ========================================
+
+.template-save-section {
+  background-color: $light-bg;
+  border-radius: $border-radius-lg;
+  padding: 20px;
+  margin-top: 20px;
+  border-top: 1px solid $border-color;
+
+  h5 {
+    color: $text-dark;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .text-muted {
+    margin-bottom: 20px;
+  }
+}
+
+// Modal improvements
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9998;
+
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  .modal-dialog {
+    background-color: #fff;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+  }
+
+  .modal-content {
+    border-radius: $border-radius-lg;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    border-bottom: 1px solid $border-color;
+    padding: 20px;
+
+    .modal-title {
+      font-weight: 600;
+      color: $text-dark;
+    }
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    border-top: 1px solid $border-color;
+    padding: 15px 20px;
+  }
+}
+
+// Table improvements
+.table {
+  border-collapse: collapse;
+  
+  th {
+    background-color: $light-bg;
+    border-bottom: 2px solid $border-color;
+    padding: 12px;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  td {
+    padding: 12px;
+    border-bottom: 1px solid $border-color;
+    vertical-align: middle;
+  }
+
+  &-hover tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.badge {
+  padding: 6px 10px;
+  border-radius: $border-radius;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  &-success {
+    background-color: $success-color;
+    color: white;
+  }
+
+  &-danger {
+    background-color: $danger-color;
+    color: white;
+  }
+}
