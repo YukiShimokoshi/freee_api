@@ -21,8 +21,11 @@ $companyId = isset($_GET['company_id']) ? $_GET['company_id'] : null;
 // 事業所一覧と選択事業所名
 $companies = getFormattedCompanies();
 
-// テンプレート一覧を取得
-$templates = getDealTemplates();
+// セッションからテンプレート適用データを取得
+if (isset($_SESSION['applied_template_data'])) {
+  $_POST = array_merge($_POST, $_SESSION['applied_template_data']);
+  unset($_SESSION['applied_template_data']);
+}
 
 $selectedCompany = null;
 foreach ($companies as $c) {
@@ -50,14 +53,50 @@ $walletables = getGroupedWalletables($companyId);
 // 品目一覧
 $items = getFormattedItems($companyId);
 
+// テンプレート一覧を取得（POST処理の後で取得）
+$templates = getDealTemplates();
+
 // POSTリクエストの処理
 $result = null;
 $error = null;
 $templateSaved = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // テンプレート適用の処理
+  if (isset($_POST['apply_template'])) {
+    $templateName = trim($_POST['template_name'] ?? '');
+    if (!empty($templateName)) {
+      $templateData = loadDealTemplate($templateName);
+      if ($templateData !== false) {
+        // フォームにテンプレートデータを適用するため、セッションに保存
+        $_SESSION['applied_template_data'] = $templateData;
+        $_SESSION['success_message'] = 'テンプレート「' . htmlspecialchars($templateName) . '」を適用しました。';
+      } else {
+        $_SESSION['error_message'] = 'テンプレートの読み込みに失敗しました。';
+      }
+    }
+    // リダイレクトしてPOST再送信を防ぐ
+    header('Location: register.php?company_id=' . urlencode($companyId));
+    exit;
+  }
+  // テンプレート削除の処理
+  elseif (isset($_POST['delete_template'])) {
+    $templateName = trim($_POST['template_name'] ?? '');
+    if (!empty($templateName)) {
+      if (deleteDealTemplate($templateName)) {
+        $_SESSION['success_message'] = 'テンプレート「' . htmlspecialchars($templateName) . '」を削除しました。';
+      } else {
+        $_SESSION['error_message'] = 'テンプレートの削除に失敗しました。';
+      }
+    } else {
+      $_SESSION['error_message'] = 'テンプレート名が指定されていません。';
+    }
+    // リダイレクトしてPOST再送信を防ぐ
+    header('Location: register.php?company_id=' . urlencode($companyId));
+    exit;
+  }
   // テンプレート保存の処理
-  if (isset($_POST['save_template'])) {
+  elseif (isset($_POST['save_template'])) {
     $templateName = trim($_POST['template_name'] ?? '');
     if (empty($templateName)) {
       $error = 'テンプレート名を入力してください。';
@@ -77,8 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (saveDealTemplate($templateName, $templateData)) {
         $templateSaved = true;
         $_SESSION['success_message'] = 'テンプレート「' . htmlspecialchars($templateName) . '」を保存しました。';
-        // テンプレート一覧を再取得
-        $templates = getDealTemplates();
+        // リダイレクトしてPOST再送信を防ぐ
+        header('Location: register.php?company_id=' . urlencode($companyId));
+        exit;
       } else {
         $error = 'テンプレートの保存に失敗しました。';
       }
@@ -196,6 +236,12 @@ include '../_includes/header.php';
     <div class="alert alert-danger">
       <p><?php echo $error; ?></p>
     </div>
+  <?php endif; ?>
+  <?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger">
+      <p><?php echo htmlspecialchars($_SESSION['error_message']); ?></p>
+    </div>
+    <?php unset($_SESSION['error_message']); ?>
   <?php endif; ?>
   <?php if (isset($_SESSION['success_message'])): ?>
     <div class="alert alert-success">
@@ -383,14 +429,18 @@ include '../_includes/header.php';
                     </td>
                     <td><?php echo htmlspecialchars($template['created_at']); ?></td>
                     <td>
-                      <button type="button" class="btn btn-sm btn-primary" 
-                              onclick="applyTemplate('<?php echo htmlspecialchars($template['name']); ?>')">
-                        適用
-                      </button>
-                      <button type="button" class="btn btn-sm btn-danger" 
-                              onclick="deleteTemplate('<?php echo htmlspecialchars($template['name']); ?>')">
-                        削除
-                      </button>
+                      <form method="POST" style="display: inline;">
+                        <input type="hidden" name="template_name" value="<?php echo htmlspecialchars($template['name']); ?>">
+                        <button type="submit" name="apply_template" class="btn btn-sm btn-primary">
+                          適用
+                        </button>
+                      </form>
+                      <form method="POST" style="display: inline;" onsubmit="return confirm('テンプレート「<?php echo htmlspecialchars($template['name']); ?>」を削除しますか？');">
+                        <input type="hidden" name="template_name" value="<?php echo htmlspecialchars($template['name']); ?>">
+                        <button type="submit" name="delete_template" class="btn btn-sm btn-danger">
+                          削除
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 <?php endforeach; ?>
