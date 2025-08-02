@@ -14,6 +14,9 @@ $(document).ready(function() {
   
   // 勘定科目検索機能の初期化
   initAccountItemSearch();
+  
+  // テンプレート保存時の必須項目チェック制御
+  initTemplateFormValidation();
 });
 
 /**
@@ -477,4 +480,29 @@ function updateAccountItemDisplay(accountItemId) {
       searchInput.classList.add('has-selection');
     }
   });
+}
+
+/**
+ * テンプレート保存時のフォームバリデーション制御
+ */
+function initTemplateFormValidation() {
+  const saveTemplateBtn = document.querySelector('[name="save_template"]');
+  if (saveTemplateBtn) {
+    saveTemplateBtn.addEventListener('click', function(e) {
+      // テンプレート名のチェックのみ
+      const templateNameInput = document.getElementById('template_name');
+      if (!templateNameInput || !templateNameInput.value.trim()) {
+        alert('テンプレート名を入力してください。');
+        e.preventDefault();
+        return false;
+      }
+      
+      // required属性を一時的に削除
+      const form = document.querySelector('form');
+      const requiredFields = form.querySelectorAll('[required]');
+      requiredFields.forEach(field => {
+        field.removeAttribute('required');
+      });
+    });
+  }
 }

@@ -27,7 +27,6 @@ include '_includes/header.php';
     <h1>Freee API - 事業所一覧</h1>
     <div class="header-buttons">
       <a href="auth.php" class="btn btn-secondary">OAuth認証</a>
-      <a href="deals/" class="btn btn-primary">取引登録</a>
       <a href="items/" class="btn btn-info">勘定科目一覧</a>
     </div>
   </div>
