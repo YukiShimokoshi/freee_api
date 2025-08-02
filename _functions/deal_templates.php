@@ -139,16 +139,48 @@ function loadDealTemplate($templateName) {
 function deleteDealTemplate($templateName) {
   $templates = getDealTemplates();
   
+  // デバッグログ
+  error_log("deleteDealTemplate: Looking for template name: " . $templateName);
+  error_log("deleteDealTemplate: Available templates: " . json_encode(array_column($templates, 'name')));
+  error_log("deleteDealTemplate: Template count before delete: " . count($templates));
+  
   // 名前でテンプレートを検索
   foreach ($templates as $template) {
     if ($template['name'] === $templateName) {
-      $filePath = getTemplateFilePath($template['id']);
+      $templateId = $template['id'];
+      $filePath = getTemplateFilePath($templateId);
+      
+      error_log("deleteDealTemplate: Found template with ID: " . $templateId);
+      error_log("deleteDealTemplate: File path: " . $filePath);
+      error_log("deleteDealTemplate: File exists: " . (file_exists($filePath) ? 'true' : 'false'));
+      
       if (file_exists($filePath)) {
-        return unlink($filePath);
+        error_log("deleteDealTemplate: File permissions: " . substr(sprintf('%o', fileperms($filePath)), -4));
+        error_log("deleteDealTemplate: File is writable: " . (is_writable($filePath) ? 'true' : 'false'));
+        error_log("deleteDealTemplate: Directory is writable: " . (is_writable(dirname($filePath)) ? 'true' : 'false'));
+        
+        $result = unlink($filePath);
+        error_log("deleteDealTemplate: Unlink result: " . ($result ? 'true' : 'false'));
+        
+        if (!$result) {
+          $error = error_get_last();
+          error_log("deleteDealTemplate: Last error: " . json_encode($error));
+        } else {
+          // 削除後のテンプレート一覧を確認
+          $templatesAfter = getDealTemplates();
+          error_log("deleteDealTemplate: Template count after delete: " . count($templatesAfter));
+          error_log("deleteDealTemplate: File exists after delete: " . (file_exists($filePath) ? 'true' : 'false'));
+        }
+        
+        return $result;
+      } else {
+        error_log("deleteDealTemplate: File does not exist: " . $filePath);
+        return false;
       }
     }
   }
   
+  error_log("deleteDealTemplate: Template not found: " . $templateName);
   return false;
 }
 

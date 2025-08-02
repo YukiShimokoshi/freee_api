@@ -1,0 +1,14 @@
+{
+    "id": "template_1754040592_157c7acb",
+    "name": "通信費（インターネット利用料）",
+    "created_at": "2025-08-01 09:29:52",
+    "data": {
+        "type": "expense",
+        "account_item_id": "734127460",
+        "tax_code": "136",
+        "from_walletable_id": "private_account_item",
+        "item_id": "216062198",
+        "ref_number": "",
+        "description": ""
+    }
+}

@@ -11,6 +11,9 @@ $(document).ready(function() {
   
   // テンプレート機能の初期化
   initTemplateFeatures();
+  
+  // 勘定科目検索機能の初期化
+  initAccountItemSearch();
 });
 
 /**
@@ -195,6 +198,11 @@ function applyTemplate(templateName) {
           const element = document.getElementById(fieldName);
           if (element) {
             element.value = data.template[fieldName] || '';
+            
+            // 勘定科目の場合は検索フィールドも更新
+            if (fieldName === 'account_item_id' && data.template[fieldName]) {
+              updateAccountItemDisplay(data.template[fieldName]);
+            }
           }
         });
         
@@ -220,6 +228,12 @@ function applyTemplate(templateName) {
  */
 function deleteTemplate(templateName) {
   if (confirm('テンプレート「' + templateName + '」を削除しますか？')) {
+    console.log('Starting deletion for template:', templateName);
+    
+    // 削除前にテンプレート一覧を取得して数を確認
+    var templatesBeforeDelete = $('.template-item').length;
+    console.log('Templates count before delete:', templatesBeforeDelete);
+    
     // AJAXでテンプレートを削除
     fetch('../api/delete_template.php', {
       method: 'POST',
@@ -228,20 +242,35 @@ function deleteTemplate(templateName) {
       },
       body: JSON.stringify({name: templateName})
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Delete response status:', response.status);
+      console.log('Delete response headers:', response.headers);
+      return response.json();
+    })
     .then(data => {
+      console.log('Delete response data:', data);
+      console.log('Response success:', data.success);
+      console.log('Response error:', data.error);
+      
+      if (data.debug_info) {
+        console.log('Debug info:', data.debug_info);
+      }
+      
       if (data.success) {
         showMessage('テンプレートを削除しました。', 'success');
-        // ページを再読み込み
+        
+        // 少し待ってからページを再読み込みして確認
         setTimeout(() => {
+          console.log('Reloading page to verify deletion...');
           location.reload();
-        }, 1500);
+        }, 2000);
       } else {
-        showMessage('テンプレートの削除に失敗しました。', 'error');
+        console.error('Delete failed:', data.error);
+        showMessage('テンプレートの削除に失敗しました。エラー: ' + (data.error || '不明なエラー'), 'error');
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Delete request error:', error);
       showMessage('テンプレートの削除中にエラーが発生しました。', 'error');
     });
   }
@@ -299,4 +328,153 @@ function showMessage(message, type = 'info') {
     // fallback: alert使用
     alert(message);
   }
+}
+
+// ========================================
+// 勘定科目検索機能
+// ========================================
+
+/**
+ * 勘定科目検索機能を初期化
+ */
+function initAccountItemSearch() {
+  const searchInput = document.getElementById('account_item_search');
+  const hiddenInput = document.getElementById('account_item_id');
+  const dropdownList = document.getElementById('account_item_list');
+  
+  if (!searchInput || !hiddenInput || !dropdownList) {
+    return; // 要素が存在しない場合は何もしない
+  }
+  
+  const dropdownItems = dropdownList.querySelectorAll('.dropdown-item');
+  let selectedIndex = -1;
+  
+  // 検索入力時のフィルタリング
+  searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    let visibleItems = [];
+    selectedIndex = -1;
+    
+    dropdownItems.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (text.includes(searchTerm)) {
+        item.classList.remove('hidden');
+        visibleItems.push(item);
+      } else {
+        item.classList.add('hidden');
+        item.classList.remove('selected');
+      }
+    });
+    
+    if (searchTerm.length > 0 && visibleItems.length > 0) {
+      dropdownList.style.display = 'block';
+    } else {
+      dropdownList.style.display = 'none';
+    }
+    
+    // hiddenInputをクリア
+    hiddenInput.value = '';
+    searchInput.classList.remove('has-selection');
+  });
+  
+  // フォーカス時にドロップダウンを表示
+  searchInput.addEventListener('focus', function() {
+    if (this.value.length > 0) {
+      dropdownList.style.display = 'block';
+    }
+  });
+  
+  // キーボードナビゲーション
+  searchInput.addEventListener('keydown', function(e) {
+    const visibleItems = Array.from(dropdownItems).filter(item => !item.classList.contains('hidden'));
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, visibleItems.length - 1);
+      updateSelection(visibleItems);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, -1);
+      updateSelection(visibleItems);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0 && visibleItems[selectedIndex]) {
+        selectItem(visibleItems[selectedIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      dropdownList.style.display = 'none';
+      selectedIndex = -1;
+    }
+  });
+  
+  // ドロップダウン項目のクリック
+  dropdownItems.forEach(item => {
+    item.addEventListener('click', function() {
+      selectItem(this);
+    });
+  });
+  
+  // 外部クリックでドロップダウンを閉じる
+  document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !dropdownList.contains(e.target)) {
+      dropdownList.style.display = 'none';
+      selectedIndex = -1;
+    }
+  });
+  
+  /**
+   * 選択状態を更新
+   */
+  function updateSelection(visibleItems) {
+    // 全ての選択状態をクリア
+    dropdownItems.forEach(item => item.classList.remove('selected'));
+    
+    // 新しい選択項目をハイライト
+    if (selectedIndex >= 0 && visibleItems[selectedIndex]) {
+      visibleItems[selectedIndex].classList.add('selected');
+      // スクロール調整
+      visibleItems[selectedIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+  
+  /**
+   * 項目を選択
+   */
+  function selectItem(item) {
+    const value = item.getAttribute('data-value');
+    const name = item.getAttribute('data-name');
+    
+    searchInput.value = name;
+    hiddenInput.value = value;
+    searchInput.classList.add('has-selection');
+    dropdownList.style.display = 'none';
+    selectedIndex = -1;
+    
+    // 選択状態をクリア
+    dropdownItems.forEach(i => i.classList.remove('selected'));
+  }
+}
+
+/**
+ * 勘定科目の表示を更新（テンプレート適用時など）
+ */
+function updateAccountItemDisplay(accountItemId) {
+  const searchInput = document.getElementById('account_item_search');
+  const hiddenInput = document.getElementById('account_item_id');
+  const dropdownList = document.getElementById('account_item_list');
+  
+  if (!searchInput || !hiddenInput || !dropdownList) {
+    return;
+  }
+  
+  // 該当する勘定科目を検索
+  const dropdownItems = dropdownList.querySelectorAll('.dropdown-item');
+  dropdownItems.forEach(item => {
+    if (item.getAttribute('data-value') === accountItemId) {
+      const name = item.getAttribute('data-name');
+      searchInput.value = name;
+      hiddenInput.value = accountItemId;
+      searchInput.classList.add('has-selection');
+    }
+  });
 }

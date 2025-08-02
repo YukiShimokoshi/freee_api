@@ -234,15 +234,18 @@ include '../_includes/header.php';
         </div>
         <div class="form-group col-md-6">
           <label for="account_item_id">勘定科目 <span class="required">*</span></label>
-          <select name="account_item_id" id="account_item_id" class="form-control" required>
-            <option value="">勘定科目を選択してください</option>
-            <?php foreach ($accountItems as $item): ?>
-              <option value="<?php echo htmlspecialchars($item['id']); ?>" <?php echo (isset($_POST['account_item_id']) && $_POST['account_item_id'] == $item['id']) ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($item['name']) . ' (' . $item['id'] . ')'; ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-          <small class="form-text text-muted">勘定科目名で選択してください</small>
+          <div class="account-item-dropdown">
+            <input type="text" id="account_item_search" class="form-control" placeholder="勘定科目を検索してください..." autocomplete="off">
+            <input type="hidden" name="account_item_id" id="account_item_id" required>
+            <div id="account_item_list" class="dropdown-list" style="display: none;">
+              <?php foreach ($accountItems as $item): ?>
+                <div class="dropdown-item" data-value="<?php echo htmlspecialchars($item['id']); ?>" data-name="<?php echo htmlspecialchars($item['name']); ?>">
+                  <?php echo htmlspecialchars($item['name']) . ' (' . $item['id'] . ')'; ?>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <small class="form-text text-muted">勘定科目名で検索して選択してください</small>
         </div>
       </div>
       <div class="form-row">
